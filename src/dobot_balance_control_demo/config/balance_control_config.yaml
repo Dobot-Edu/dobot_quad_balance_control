@@ -1,0 +1,52 @@
+# Dobot IMU 姿态平衡补偿演示配置
+
+robot:
+  grpc_addr: "192.168.5.2:50051"
+  enter_balance_stand_on_start: true
+  # false 时只发布控制计算和日志，不调用高层姿态动作。
+  enable_execute: true
+
+dds:
+  config_file: "dobot_quad_sdk-main/low_level/python/config/dds_config.yaml"
+  domain_id: 0
+  lower_state_topic: "rt/lower/state"
+  publish_period_seconds: 0.02
+
+filter:
+  # 低通滤波系数，越小越平滑，越大响应越快。
+  low_pass_alpha: 0.25
+  moving_average_window: 5
+
+control:
+  target_roll_deg: 0.0
+  target_pitch_deg: 0.0
+  trigger_threshold_deg: 3.0
+  settle_threshold_deg: 1.5
+  max_compensation_deg: 10.0
+  action_duration_seconds: 0.8
+  action_cooldown_seconds: 1.2
+  # compensation = sign * PID(error)，若实机补偿方向反了，修改对应符号。
+  roll_output_sign: -1.0
+  pitch_output_sign: -1.0
+  kp_roll: 0.8
+  ki_roll: 0.0
+  kd_roll: 0.08
+  kp_pitch: 0.8
+  ki_pitch: 0.0
+  kd_pitch: 0.08
+  integral_limit_deg_s: 8.0
+  # "combined" 使用 dynamic_pose 同时补偿 roll/pitch；"axis" 分轴调用。
+  compensation_mode: "combined"
+
+logging:
+  # 默认关闭底层节点周期日志，课堂展示由 demo_monitor_node 统一输出。
+  imu_log_period_seconds: 0.0
+  control_log_period_seconds: 0.0
+
+display:
+  monitor_period_seconds: 0.5
+  stale_timeout_seconds: 2.0
+
+plot:
+  output_dir: "balance_outputs"
+  max_samples: 5000
